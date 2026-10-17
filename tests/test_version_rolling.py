@@ -101,11 +101,13 @@ class BIP310Tests(unittest.TestCase):
                     {'version-rolling.mask':'1fffe000','version-rolling.min-bit-count':2}])
                 self.assertTrue(c.read()['result']['version-rolling'])
                 c.send(2,'mining.subscribe',[]);sub=c.read();self.assertEqual(sub['id'],2)
+                extra_nonce1=bytes.fromhex(sub['result'][1])
                 c.send(3,'mining.authorize',[DEV_FEE_ADDRESS+'.bitaxe','x'])
                 self.assertTrue(c.read()['result'])
                 self.assertEqual(c.read()['method'],'mining.set_difficulty')
                 notify=c.read()['params']
-                parent_coinbase=bytes.fromhex(notify[2])+bytes.fromhex('12345678')+bytes.fromhex(notify[3])
+                parent_coinbase=(bytes.fromhex(notify[2])+extra_nonce1
+                    +bytes.fromhex('12345678')+bytes.fromhex(notify[3]))
                 merkle=dsha(parent_coinbase)
                 target=compact_target(notify[6])
                 ts=int(notify[7],16);bits=int(notify[6],16)
@@ -126,6 +128,7 @@ class BIP310Tests(unittest.TestCase):
                 self.assertEqual(pool.status()['accepted'],1)
                 self.assertEqual(pool.status()['blocks'],1)
                 self.assertIn(header,fake.last_block)
+                self.assertIn(parent_coinbase,fake.last_block)
         finally:
             pool.close()
             svc.DIFF1=old_diff1

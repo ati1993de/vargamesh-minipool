@@ -39,8 +39,12 @@ class CryptoTests(unittest.TestCase):
         work=make_child_work(sample_gbt(),ADDRESS)
         job=parent_job(work,b'ABCD','job1')
         parent,full=parent_candidate(job,b'1234',1700000001,42)
-        coinbase=job.coinb1+b'1234'+job.coinb2
+        # Independent Stratum V1 reconstruction: the miner injects BOTH
+        # extranonce1 from subscribe and extranonce2 into the coinbase.
+        coinbase=job.coinb1+job.extranonce1+b'1234'+job.coinb2
         self.assertEqual(parent[36:68],dsha(coinbase))
+        self.assertNotIn(job.extranonce1,job.coinb1)
+        self.assertEqual(coinbase[4],1)
         self.assertIn(MAGIC+bytes.fromhex(work.child_hash)+struct.pack('<II',1,0),coinbase)
         self.assertEqual(full[:80],work.child_header)
         self.assertEqual(full[80:80+len(coinbase)],coinbase)

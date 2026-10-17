@@ -300,9 +300,6 @@ class MinerHandler(socketserver.BaseRequestHandler):
                 key=(jobid,ex2.lower(),ts.lower(),nonce_s.lower(),version_bits)
                 if version_bits is not None:
                     version=(job.parent_version & ~self.version_rolling_mask) | version_bits
-                if key in self.duplicates: raise ValueError('Duplicate share')
-                if len(self.duplicates)>=20000: raise ValueError('Job share limit reached, await next job')
-                self.duplicates.add(key)
             if ntime < job.work.mintime or ntime > time.time()+7200:
                 raise ValueError('Invalid block timestamp')
             with self.pool.lock:
@@ -312,8 +309,16 @@ class MinerHandler(socketserver.BaseRequestHandler):
             header, rawblock=parent_candidate(job,extra,ntime,nonce,version=version)
             hash_num=int.from_bytes(__import__('hashlib').sha256(__import__('hashlib').sha256(header).digest()).digest(),'little')
             target=min((DIFF1 // self.difficulty),2**256-1)
-            if hash_num > target: raise ValueError('Low difficulty share')
+            if hash_num > target:
+                # Record a clear mismatch diagnosis without treating invalid work
+                # as an accepted/duplicate share. Rejected work may be retried.
+                actual_diff = DIFF1 / hash_num
+                raise ValueError(f'Low difficulty share (computed {actual_diff:.3g}, required {self.difficulty})')
             diff=DIFF1/hash_num if hash_num else float('inf')
+            with self.job_lock:
+                if key in self.duplicates: raise ValueError('Duplicate share')
+                if len(self.duplicates)>=20000: raise ValueError('Job share limit reached, await next job')
+                self.duplicates.add(key)
             now=time.time()
             with self.pool.lock:
                 self.accepted+=1

@@ -181,9 +181,12 @@ class ParentJob:
 def parent_job(work: ChildWork, extranonce1: bytes, job_id: str, extranonce2_size=4) -> ParentJob:
     if len(extranonce1) != 4: raise ValueError('extranonce1 must be 4 bytes')
     # The synthetic parent pays NO Bitcoin rewards; 0-satoshi OP_TRUE output.
-    prefix = b'/VMESH/' + extranonce1
+    # Stratum V1 miners construct the parent coinbase as:
+    #   coinb1 + extranonce1 (from subscribe) + extranonce2 + coinb2
+    # Do NOT include extranonce1 in coinb1: the ASIC inserts it itself.
+    prefix = b'/VMESH/'
     suffix = MAGIC + bytes.fromhex(work.child_hash) + struct.pack('<II', 1, 0)
-    sig_len = len(prefix) + extranonce2_size + len(suffix)
+    sig_len = len(prefix) + len(extranonce1) + extranonce2_size + len(suffix)
     if sig_len > 100: raise ValueError('parent scriptSig too long')
     coinb1 = b'\x01\x00\x00\x00' + b'\x01' + b'\x00'*32 + b'\xff'*4 + varint(sig_len) + prefix
     coinb2 = suffix + b'\xff'*4 + b'\x01' + struct.pack('<Q', 0) + b'\x01\x51' + b'\x00'*4
@@ -197,7 +200,7 @@ def parent_candidate(job: ParentJob, extranonce2: bytes, ntime: int, nonce: int,
     v = job.parent_version if version is None else version
     if not isinstance(v,int) or v < 0 or v >= 2**32 or ((v ^ job.parent_version) & ~VERSION_ROLLING_MASK):
         raise ValueError('parent version changed outside safe BIP310 rolling mask')
-    parent_coinbase = job.coinb1 + extranonce2 + job.coinb2
+    parent_coinbase = job.coinb1 + job.extranonce1 + extranonce2 + job.coinb2
     root = dsha(parent_coinbase)
     header = (struct.pack('<I', v) + job.parent_prev + root +
               struct.pack('<I', ntime) + struct.pack('<I', int(job.work.bits,16)) + struct.pack('<I',nonce))

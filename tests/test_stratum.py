@@ -74,7 +74,8 @@ class StratumTests(unittest.TestCase):
                 self.assertTrue(read()['result'])
                 self.assertEqual(read()['method'],'mining.set_difficulty')
                 notification=read()['params']
-                cb=bytes.fromhex(notification[2])+bytes.fromhex('12345678')+bytes.fromhex(notification[3])
+                cb=(bytes.fromhex(notification[2])+bytes.fromhex(extranonce1)
+                    +bytes.fromhex('12345678')+bytes.fromhex(notification[3]))
                 merkle=dsha(cb)
                 ts=int(notification[7],16)
                 bits=int(notification[6],16)
