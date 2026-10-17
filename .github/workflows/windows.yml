@@ -18,6 +18,8 @@ jobs:
           python-version: '3.13'
       - name: Run Python tests
         run: python -m unittest discover -v
+      - name: Verify official VMESH Core download, checksum and executable
+        run: python scripts/verify-core-release.py
       - name: Install PyInstaller
         run: python -m pip install 'pyinstaller>=6,<7'
       - name: Build GUI (unsigned developer-preview binary)
