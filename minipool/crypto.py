@@ -184,7 +184,11 @@ def parent_job(work: ChildWork, extranonce1: bytes, job_id: str, extranonce2_siz
     # Stratum V1 miners construct the parent coinbase as:
     #   coinb1 + extranonce1 (from subscribe) + extranonce2 + coinb2
     # Do NOT include extranonce1 in coinb1: the ASIC inserts it itself.
-    prefix = b'/VMESH/'
+    # AxeOS coinbase decoders expect a BIP34-like height push at the
+    # beginning of the synthetic parent scriptSig. This is the VMESH child
+    # height for display compatibility, NOT a Bitcoin blockchain height.
+    # Keep both Stratum extranonces outside coinb1; the ASIC inserts them.
+    prefix = push(scriptnum(work.height)) + b'/VMESH/'
     suffix = MAGIC + bytes.fromhex(work.child_hash) + struct.pack('<II', 1, 0)
     sig_len = len(prefix) + len(extranonce1) + extranonce2_size + len(suffix)
     if sig_len > 100: raise ValueError('parent scriptSig too long')

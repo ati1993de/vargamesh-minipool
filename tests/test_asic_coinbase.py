@@ -89,6 +89,24 @@ class ASICCoinbaseTests(unittest.TestCase):
         finally:
             svc.DIFF1=previous
 
+    def test_axeos_bip34_coinbase_header_decodes(self):
+        """AxeOS v2.14 decoder reads height-push from the Stratum coinb1."""
+        sock,c,en1,notify=self.connect()
+        with sock:
+            coinb1=bytes.fromhex(notify[2])
+            coinb2=bytes.fromhex(notify[3])
+            sig_size=coinb1[41]
+            height_size=coinb1[42]
+            self.assertIn(height_size,(1,2,3,4))
+            height=int.from_bytes(coinb1[43:43+height_size],'little')
+            self.assertEqual(height,24)
+            self.assertEqual(coinb1[43+height_size:43+height_size+7],b'/VMESH/')
+            cb=coinb1+en1+b'\x01\x00\x00\x00'+coinb2
+            sig_begin=42
+            self.assertEqual(cb[sig_begin+sig_size:sig_begin+sig_size+4],b'\xff'*4)
+            self.assertEqual(cb[sig_begin+sig_size+4],1)
+            self.assertEqual(cb[sig_begin+sig_size+5:sig_begin+sig_size+13],b'\x00'*8)
+
     def test_invalid_share_resubmission_is_not_a_duplicate(self):
         sock,c,en1,notify=self.connect()
         with sock:

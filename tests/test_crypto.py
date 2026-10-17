@@ -45,6 +45,15 @@ class CryptoTests(unittest.TestCase):
         self.assertEqual(parent[36:68],dsha(coinbase))
         self.assertNotIn(job.extranonce1,job.coinb1)
         self.assertEqual(coinbase[4],1)
+        # Regression for AxeOS 2.14+ coinbase_decode: expects BIP34 height
+        # immediately after the scriptSig-length at byte 42 of coinb1.
+        script_len = job.coinb1[41]
+        height_len = job.coinb1[42]
+        self.assertTrue(1 <= height_len <= 4)
+        self.assertEqual(int.from_bytes(job.coinb1[43:43+height_len],'little'),work.height)
+        self.assertEqual(len(coinbase)-46,script_len+4+1+8+1+1+4)
+        self.assertIn(b'/VMESH/',job.coinb1)
+        self.assertNotIn(b'\xf1\xbe',job.coinb1)
         self.assertIn(MAGIC+bytes.fromhex(work.child_hash)+struct.pack('<II',1,0),coinbase)
         self.assertEqual(full[:80],work.child_header)
         self.assertEqual(full[80:80+len(coinbase)],coinbase)
