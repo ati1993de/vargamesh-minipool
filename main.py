@@ -136,8 +136,8 @@ def gui(runtime):
     from tkinter import filedialog,messagebox,ttk
     root=tk.Tk()
     root.title('VargaMesh MiniPool  •  VMESH SOLO')
-    root.geometry('800x650')
-    root.minsize(640,570)
+    root.geometry('860x780')
+    root.minsize(720,660)
     root.configure(bg='#0b1220')
     style=ttk.Style(root)
     try:style.theme_use('clam')
@@ -271,6 +271,32 @@ def gui(runtime):
     ttk.Button(buttons2,text='Stop Pool',command=lambda:(runtime.stop_pool(),pool_status.set('Pool: stopped'))).pack(side='left',padx=(0,8))
     ttk.Button(buttons2,text='Save configuration',command=apply).pack(side='left',padx=(0,8))
     ttk.Button(buttons2,text='Download official Core ↗',command=lambda:webbrowser.open('https://github.com/ati1993de/vargamesh-core/releases')).pack(side='left')
+    # Optional public wallet address, used only to compose Bitaxe settings.
+    def local_ipv4():
+        try:
+            for address in socket.gethostbyname_ex(socket.gethostname())[2]:
+                ip=ipaddress.ip_address(address)
+                if ip.version==4 and ip.is_private and not ip.is_loopback:
+                    return address
+        except (OSError,ValueError):pass
+        return 'YOUR-WINDOWS-PC-LAN-IP'
+    wallet=tk.StringVar(value=runtime.config['pool'].get('preferred_wallet',''))
+    miner_box=ttk.Frame(frame);miner_box.pack(fill='x',pady=(4,9))
+    ttk.Label(miner_box,text='VMESH payout address:').pack(side='left')
+    ttk.Entry(miner_box,textvariable=wallet).pack(side='left',fill='x',expand=True,padx=6)
+    def copy_settings():
+        from minipool.crypto import bech32_script
+        address=wallet.get().strip()
+        try:bech32_script(address)
+        except Exception:
+            messagebox.showerror('Invalid wallet address','Enter a valid vm1... mainnet wallet address.');return
+        text=(f'stratum+tcp://{local_ipv4()}:{vars["stratum_port"].get()}\n'
+              f'Username: {address}.bitaxe01\nPassword: x')
+        root.clipboard_clear();root.clipboard_append(text)
+        runtime.config['pool']['preferred_wallet']=address
+        save_config(runtime.config)
+        messagebox.showinfo('Copied','Paste the Stratum URL, username and password into your ASIC.')
+    ttk.Button(miner_box,text='Copy Bitaxe settings',command=copy_settings).pack(side='left')
     log=tk.Text(frame,bg='#111e30',fg='#b9cde6',height=9,relief='flat',font=('Consolas',9),wrap='word')
     log.pack(fill='both',expand=True)
     log.insert('end','No mining yet. Start VargaMesh Core first; wait until it finishes syncing.\n')
