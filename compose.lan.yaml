@@ -1,0 +1,7 @@
+# OPTIONAL: permit trusted private LAN ASIC access.
+# .env: STRATUM_BIND_IP=<Linux host's real private LAN IPv4>.
+# docker compose -f compose.yaml -f compose.lan.yaml up -d --build
+services:
+  minipool:
+    ports:
+      - "${STRATUM_BIND_IP:?Set STRATUM_BIND_IP in .env to the Linux host LAN IP}:3938:3938/tcp"

@@ -1,0 +1,14 @@
+# OPTIONAL Nginx Proxy Manager: authenticated, HTTPS read-only dashboard.
+# Attach NPM to NPM_DOCKER_NETWORK, enforce an Access List, and configure:
+# NPM Proxy Host -> http://vmesh-minipool:8686
+# .env: MINIPOOL_DASHBOARD_ALLOWED_HOSTS=pool.example.com
+# docker compose -f compose.yaml -f compose.npm.yaml up -d --build
+services:
+  minipool:
+    networks:
+      - default
+      - npm_network
+networks:
+  npm_network:
+    name: ${NPM_DOCKER_NETWORK:-npm_proxy}
+    external: true
