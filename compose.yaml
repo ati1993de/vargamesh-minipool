@@ -1,4 +1,8 @@
 # VMESH-only Docker + official VargaMesh Core, x86_64.
+# Host ports default to 127.0.0.1. Set MINIPOOL_STRATUM_BIND_IP and
+# MINIPOOL_WEB_BIND_IP explicitly to 0.0.0.0 in .env to expose publicly.
+# Public dashboard Host headers must also be listed in
+# MINIPOOL_DASHBOARD_ALLOWED_HOSTS (public IP and/or FQDN).
 services:
   minipool:
     image: ghcr.io/ati1993de/vargamesh-minipool:latest
@@ -24,8 +28,8 @@ services:
       MINIPOOL_DASHBOARD_ALLOWED_HOSTS: ${MINIPOOL_DASHBOARD_ALLOWED_HOSTS:-}
       MINIPOOL_SHARE_DIFFICULTY: ${MINIPOOL_SHARE_DIFFICULTY:-1024}
     ports:
-      - "127.0.0.1:3938:3938/tcp"
-      - "127.0.0.1:8686:8686/tcp"
+      - "${MINIPOOL_STRATUM_BIND_IP:-127.0.0.1}:3938:3938/tcp"
+      - "${MINIPOOL_WEB_BIND_IP:-127.0.0.1}:8686:8686/tcp"
     healthcheck:
       test: ["CMD","python3","-c","import urllib.request; urllib.request.urlopen('http://127.0.0.1:8686/api/status',timeout=5).read()"]
       interval: 30s
