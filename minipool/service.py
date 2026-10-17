@@ -300,6 +300,9 @@ class MinerHandler(socketserver.BaseRequestHandler):
                 key=(jobid,ex2.lower(),ts.lower(),nonce_s.lower(),version_bits)
                 if version_bits is not None:
                     version=(job.parent_version & ~self.version_rolling_mask) | version_bits
+                # Reject repeats only if this share previously PASSED PoW; never
+                # remember a low-diff share as a valid duplicate.
+                if key in self.duplicates: raise ValueError('Duplicate share')
             if ntime < job.work.mintime or ntime > time.time()+7200:
                 raise ValueError('Invalid block timestamp')
             with self.pool.lock:
