@@ -4,7 +4,7 @@
 
 [![VMESH](https://img.shields.io/badge/VMESH-mainnet-38bcab)](https://vargamesh.com/) [![SHA256d](https://img.shields.io/badge/Mining-SHA--256d-blue)](https://vargamesh.com/mining.html) [![Fee](https://img.shields.io/badge/Developer%20fee-1%25-6b85ff)](#transparent-1-developer-fee) [![CI](https://github.com/ati1993de/vargamesh-minipool/actions/workflows/test.yml/badge.svg)](https://github.com/ati1993de/vargamesh-minipool/actions) [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-> **Release status: v0.2.1 developer preview.** Offline serialization and mock-Stratum tests pass, and the GitHub Windows build checks the official VargaMesh Core download, checksum, and executable. An end-to-end, hardware-backed VMESH **mainnet accepted-block test has NOT been performed** for this release. Do not present this preview as audited or production-proven. Test with a dedicated synchronized node before production use. No guarantee of block rewards or profitability.
+> **Release status: v0.2.2 developer preview.** Offline serialization and mock-Stratum tests pass, and the GitHub Windows build checks the official VargaMesh Core download, checksum, and executable. An end-to-end, hardware-backed VMESH **mainnet accepted-block test has NOT been performed** for this release. Do not present this preview as audited or production-proven. Test with a dedicated synchronized node before production use. No guarantee of block rewards or profitability.
 
 ## Why MiniPool?
 
@@ -21,10 +21,10 @@
 
 ## One-click quick start — Windows 10/11 (no manual node setup)
 
-[**Download current MiniPool v0.2.1 release (Windows + source)**](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.2.1) · [**Deutsche Anleitung**](docs/README.de.md) · [**Release notes**](docs/RELEASE-v0.2.0.md)
+[**Download current MiniPool v0.2.2 release (Windows + source)**](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.2.2) · [**Deutsche Anleitung**](docs/README.de.md) · [**Release notes**](docs/RELEASE-v0.2.0.md)
 
 
-**Recommended:** Download **VargaMesh-MiniPool-Windows-x64.zip** from the [official v0.2.0 GitHub Release](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.2.1). Extract the ZIP completely and run **VargaMesh-MiniPool.exe**. The release also provides a separate SHA-256 checksum file. Alternatively, obtain the latest developer artifact from [GitHub Actions](https://github.com/ati1993de/vargamesh-minipool/actions/workflows/windows.yml), or use Python 3.10+ with **start-windows.bat**.
+**Recommended:** Download **VargaMesh-MiniPool-Windows-x64.zip** from the [official v0.2.0 GitHub Release](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.2.2). Extract the ZIP completely and run **VargaMesh-MiniPool.exe**. The release also provides a separate SHA-256 checksum file. Alternatively, obtain the latest developer artifact from [GitHub Actions](https://github.com/ati1993de/vargamesh-minipool/actions/workflows/windows.yml), or use Python 3.10+ with **start-windows.bat**.
 
 1. Click **ONE CLICK: Install VMESH Node & Start Pool** in the Windows GUI.
 2. MiniPool downloads **official VargaMesh Core v0.2.0 (Windows x64)** from the official GitHub release, verifies the manifest and archive against two **pinned SHA-256 hashes**, and extracts the node into your user's Local AppData folder.
@@ -36,11 +36,17 @@ No Bitcoin node or BTC wallet is required. No VMESH seed phrase or private key i
 
 **Status:** Windows builds from main are developer previews, not production-audited releases. No hardware-confirmed mainnet block acceptance has been demonstrated yet. The Windows EXE is currently unsigned and may trigger SmartScreen. Do not expose Stratum/RPC to the public Internet.
 
-### Bitaxe / AxeOS BIP310 compatibility (v0.2.1)
+### Bitaxe / AxeOS: low-difficulty shares and extranonce1 fix (v0.2.2)
+
+**Fixed in v0.2.2:** Standard Stratum V1 miners construct the synthetic parent coinbase as `coinb1 + extranonce1 + extranonce2 + coinb2`. The server previously omitted `extranonce1` from the reconstruction while embedding it directly inside `coinb1`, causing the ASIC and server to hash **different parent work** and reject valid miner shares with `Low difficulty share`. The corrected server gives the miner `coinb1` *without* `extranonce1`, then inserts both extranonces when reconstructing its parent header.
+
+Shares are now marked as duplicates **only after valid proof-of-work verification**. An invalid share retried by the same miner remains a low-difficulty rejection instead of being incorrectly counted as a duplicate. With a real ASIC, check that accepted shares rise and invalid/duplicate counters remain low after restarting MiniPool. The share-difficulty setting of `1024` can remain unchanged while verifying the fix. Independent synthetic-miner Stratum integration tests cover the full extranonce1/2 reconstruction and the 1% VMESH developer coinbase.
+
+**Compatibility inherited from v0.2.1:**
 
 MiniPool implements `mining.configure` with the **BIP310 `version-rolling` extension** and negotiates the safe parent header mask `1fffe000` (intersected with the miner mask). Bitaxe/AxeOS can submit the optional sixth `version_bits` field. Submitted bits outside the negotiated mask are rejected. Only the **synthetic AuxPoW parent nVersion** may roll; the **VMESH child header, AuxPoW chain ID and 99/1 VMESH coinbase payouts stay unchanged**.
 
-If AxeOS reports **"Version rolling not supported (100%)"**, update MiniPool to v0.2.1 or later. Restart the old MiniPool Windows application (and, if required, restart the Bitaxe) so the Stratum connection renegotiates BIP310. With a 0.48 TH/s Bitaxe at share difficulty 1024, accepted shares may arrive roughly every 9 seconds on average, but arrival times vary. There is no guarantee of finding a VMESH block.
+If AxeOS reports **"Version rolling not supported (100%)"**, update MiniPool to v0.2.2 or later. Restart the old MiniPool Windows application (and, if required, restart the Bitaxe) so the Stratum connection renegotiates BIP310. With a 0.48 TH/s Bitaxe at share difficulty 1024, accepted shares may arrive roughly every 9 seconds on average, but arrival times vary. There is no guarantee of finding a VMESH block.
 
 If AxeOS shows **"Using fallback pool"**, the configured **primary pool is unreachable or rejected**. On the Bitaxe Pool Settings page, set the intended primary Stratum V1 host to the LAN IP of the MiniPool PC (example `192.168.178.55`, port `3938`), username `vm1YOUR_VALID_ADDRESS.bitaxe01`, password `x`. Disable an unused backup/fallback entry or configure a separate working backup. Do not confuse the active fallback selection with successful primary connectivity. Keep the local PC and Bitaxe on trusted private LAN and allow TCP 3938 only on the private Windows firewall profile.
 
@@ -109,7 +115,7 @@ Saved GUI configuration: `%APPDATA%\VargaMeshMiniPool\config.json` on Windows, o
 }
 ```
 
-The default `share_difficulty` is fixed at **1024**. Select a lower value for slower devices or higher for many fast ASICs. Automatic variable difficulty (VarDiff) and Stratum V2 are **not implemented** in v0.2.1.
+The default `share_difficulty` is fixed at **1024**. Select a lower value for slower devices or higher for many fast ASICs. Automatic variable difficulty (VarDiff) and Stratum V2 are **not implemented** in v0.2.2.
 
 ## Transparent 1% developer fee
 
@@ -134,7 +140,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the serialization and valid
 
 ### Verify the Windows release ZIP
 
-Download `VargaMesh-MiniPool-Windows-x64.zip` and `SHA256SUMS-MiniPool-Windows` from the same [v0.2.1 release](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.2.1). In PowerShell, compare the `Get-FileHash -Algorithm SHA256` output of the ZIP with the first digest in the checksum file. The MiniPool Windows ZIP **does not bundle the node**: the separately downloaded official VargaMesh Core v0.2.0 archive is verified at installation time.
+Download `VargaMesh-MiniPool-Windows-x64.zip` and `SHA256SUMS-MiniPool-Windows` from the same [v0.2.2 release](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.2.2). In PowerShell, compare the `Get-FileHash -Algorithm SHA256` output of the ZIP with the first digest in the checksum file. The MiniPool Windows ZIP **does not bundle the node**: the separately downloaded official VargaMesh Core v0.2.0 archive is verified at installation time.
 
 ## Security and limitations
 
@@ -150,7 +156,7 @@ Download `VargaMesh-MiniPool-Windows-x64.zip` and `SHA256SUMS-MiniPool-Windows` 
 
 No external runtime dependencies: `python -m unittest discover -v` runs the stdlib unit tests and a fake-RPC Stratum integration test.
 
-The workflow [.github/workflows/windows.yml](.github/workflows/windows.yml) packages the Windows GUI with PyInstaller on Windows runners on each main update. The **v0.2.1 release** includes a tested Windows ZIP and published SHA-256 checksum file; source snapshots are provided automatically by GitHub. After future development commits, Actions artifacts may be newer than the tagged release. The EXE installs official Core on first run after an explicit click, rather than bundling it.
+The workflow [.github/workflows/windows.yml](.github/workflows/windows.yml) packages the Windows GUI with PyInstaller on Windows runners on each main update. The **v0.2.2 release** includes a tested Windows ZIP and published SHA-256 checksum file; source snapshots are provided automatically by GitHub. After future development commits, Actions artifacts may be newer than the tagged release. The EXE installs official Core on first run after an explicit click, rather than bundling it.
 
 Repository SEO / topics suggestion: `vargamesh`, `vmesh`, `bitaxe`, `solo-mining`, `mining-pool`, `sha256d`, `asic-mining`, `stratum`, `auxpow`, `windows`, `bitcoin-mining-hardware`, `open-source`, `cryptocurrency`.
 

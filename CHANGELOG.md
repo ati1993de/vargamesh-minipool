@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.2 — 2026-10-17
+
+Fixes Stratum V1 ASIC share verification and wrong duplicate counting.
+
+- Correctly reconstruct synthetic parent coinbase from `coinb1 + extranonce1 + extranonce2 + coinb2`, matching how Bitaxe/AxeOS and other miners compute work.
+- Do not embed extranonce1 inside `coinb1`; still include its 4 bytes in the parent coinbase's declared script length.
+- Rejected low-difficulty shares are not stored as previously accepted duplicate work.
+- Diagnostics display computed and required share difficulty for rejected work.
+- New independent Stratum miner regression tests generate valid and invalid candidate shares and verify serialized submitted VMESH AuxPoW blocks.
+- Retain BIP310 version rolling, exactly 99% miner / 1% developer child coinbase output, and Windows one-click verified VMESH Core node installation.
+
+**Status:** Developer preview. Independent ASIC mainnet accepted-block proof still pending.
+
 ## 0.2.1 — 2026-10-17
 
 Bitaxe / AxeOS Stratum V1 BIP310 compatibility fix.
