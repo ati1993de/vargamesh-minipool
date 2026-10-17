@@ -332,7 +332,7 @@ def gui(runtime):
         if runtime.pool:
             info=runtime.pool.status()
             pool_status.set(('Pool: ONLINE' if info['node_ready'] else 'Pool: waiting for synced VMESH node')+
-                f"  | workers: {info['workers']}  | shares: {info['accepted']}  | blocks: {info['blocks']}")
+                f"  | workers: {info['workers']}  | shares: {info['accepted']}  | rejected: {info['rejected']}  | blocks: {info['blocks']}")
             entries='\n'.join(time.strftime('%H:%M:%S',time.localtime(e['time']))+'  '+e['message'] for e in reversed(info['events'][:30]))
             if info['node_error']: entries+='\nNode: '+info['node_error']
             if entries!=prior:

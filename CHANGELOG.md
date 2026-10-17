@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.1 — 2026-10-17
+
+Bitaxe / AxeOS Stratum V1 BIP310 compatibility fix.
+
+- Proper `mining.configure` version-rolling negotiation and mask intersection (server mask `1fffe000`).
+- Accept `version_bits` as sixth Stratum `mining.submit` parameter only after negotiation; reject bits outside the negotiated mask.
+- Recompute synthetic AuxPoW parent header nVersion from the negotiated mask while keeping the VMESH child header and 1% developer coinbase output unchanged.
+- Share duplicate detection now includes rolled version bits.
+- Improved rejection diagnostics and Windows GUI rejected-share counter.
+- Automated Bitaxe-like Stratum tests: handshake, mask rejection and simulated rolled block submission.
+- Updated English/German Bitaxe setup guidance, including primary-versus-fallback pool troubleshooting.
+- Updated Windows EXE release with checksum and source tag.
+
+**Scope:** Developer preview. Not yet validated with an actual hardware-mined VMESH mainnet block. Do not expose Stratum to public internet without hardening.
+
+# Changelog
+
 ## 0.2.0 — 2026-10-17
 
 Windows one-click VMESH-only setup (developer preview).
