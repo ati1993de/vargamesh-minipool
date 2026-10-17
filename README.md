@@ -13,22 +13,25 @@
 - **SOLO payout** — each authorized miner supplies a valid `vm1...` address; block rewards go to that address, minus the fixed 1% developer fee.
 - **No BTC full node needed** — VMESH mainnet AuxPoW is fulfilled with a *synthetic local SHA-256d parent header*. No Bitcoin blocks or BTC rewards are involved.
 - **Stratum V1** — `mining.subscribe`, `mining.authorize`, `mining.notify`, `mining.set_difficulty` and verified `mining.submit`.
-- **Windows GUI** — launch the official VMESH node, start/stop the SOLO pool, open the dashboard and inspect logs.
+- **One-click Windows GUI** — download SHA-256 verified VMESH Core, start/sync the dedicated node, automatically enable SOLO mining and copy Bitaxe settings.
 - **Responsive dashboard** — worker count, estimated hashrate, shares, node health, block finds, per-worker stats.
 - **Mainnet only** — rejects incorrect AuxPoW chain IDs and out-of-sync nodes.
 - **Minimal dependencies** — Python 3.10+ standard library; no database, cloud APIs or extra Python pip packages required at runtime.
 - **Privacy** — no website accounts, cloud analytics or private keys in the MiniPool.
 
-## Quick start — Windows 10/11
+## One-click quick start — Windows 10/11 (no manual node setup)
 
-1. Download the official **VargaMesh Core Windows x86_64 release** from [vargamesh-core/releases](https://github.com/ati1993de/vargamesh-core/releases). Verify `SHA256SUMS` from the release and extract the archive. Find `vargameshd.exe` inside its `bin` folder. **Never download Core from an unknown website.**
-2. Install [Python 3.10+](https://www.python.org/downloads/windows/) and tick **Add Python to PATH**, or build/download the Windows GUI artifact from the GitHub Actions workflow.
-3. Download/extract this MiniPool repository, then double-click **`start-windows.bat`** (for source distribution) or **`VargaMesh-MiniPool.exe`** (GitHub Actions Windows build).
-4. Click **Browse** and select your official `vargameshd.exe`. Keep the suggested dedicated blockchain data folder. Click **Start VargaMesh Node**. The first mainnet sync may take time. The GUI does not bypass synchronization.
-5. Click **Start SOLO Pool**. The dashboard will report *Waiting for VargaMesh Core* until the node reports synchronized mainnet and can serve AuxPoW block templates.
-6. Click **Dashboard** and configure your Bitaxe or ASIC as below.
+Download the Windows GUI from [GitHub Actions](https://github.com/ati1993de/vargamesh-minipool/actions/workflows/windows.yml). Open a successful workflow run, download its **VargaMesh-MiniPool-Windows-x64** artifact, unzip it and run **VargaMesh-MiniPool.exe**. Alternatively, install Python 3.10+ and double-click **start-windows.bat**.
 
-**Wallet note:** MiniPool never asks for private keys. Use an address from a validated VMESH mainnet wallet. Each worker's username determines its own on-chain payout destination.
+1. Click **ONE CLICK: Install VMESH Node & Start Pool** in the Windows GUI.
+2. MiniPool downloads **official VargaMesh Core v0.2.0 (Windows x64)** from the official GitHub release, verifies the manifest and archive against two **pinned SHA-256 hashes**, and extracts the node into your user's Local AppData folder.
+3. It launches a dedicated **VargaMesh mainnet node** with authenticated loopback-only RPC, and shows synchronization status. The first blockchain download takes time.
+4. **Only after the VargaMesh node reports full synchronization**, MiniPool starts VMESH Stratum and opens the local dashboard.
+5. Paste a public **vm1... payout address** into the GUI and click **Copy Bitaxe settings**. Configure your SHA-256d miner using those credentials.
+
+No Bitcoin node or BTC wallet is required. No VMESH seed phrase or private key is ever requested. The node installer runs **only after an explicit click** and does not touch any existing VMESH installation. Manual advanced setup controls remain available.
+
+**Status:** Windows builds from main are developer previews, not production-audited releases. No hardware-confirmed mainnet block acceptance has been demonstrated yet. The Windows EXE is currently unsigned and may trigger SmartScreen. Do not expose Stratum/RPC to the public Internet.
 
 ### Connect a Bitaxe / NerdAxe / Lucky Miner
 
@@ -123,7 +126,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the serialization and valid
 - **Only run on a trusted LAN / firewalled host.** Stratum V1 is unencrypted and unauthenticated beyond payout-address validation. Do not expose Stratum on the public internet without a secure tunnel and independent review.
 - Keep VargaMesh RPC bound to `127.0.0.1`; never expose the node cookie, RPC port or node private keys.
 - The local dashboard is read-only and has no user accounts. It is deliberately bound to loopback.
-- Windows GUI starts **a separately downloaded official VargaMesh Core binary**; it never bundles or auto-downloads an unaudited node binary. It does not modify the wallet or store private keys.
+- Windows GUI auto-downloads **official, version-pinned and checksum-verified VargaMesh Core** only after a user click. It does not modify the wallet or store private keys.
 - VMESH node must finish synchronization. Miner shares before sync are not valid work.
 - The pool uses fixed share difficulty and one active job per miner. Jobs are invalidated on template refresh. No historical share database, VarDiff, public API authorization, TLS or automatic network edge security yet.
 - All users should independently verify coinbase payouts and accepted AuxPoW blocks on test infrastructure before mainnet production.
@@ -132,7 +135,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the serialization and valid
 
 No external runtime dependencies: `python -m unittest discover -v` runs the stdlib unit tests and a fake-RPC Stratum integration test.
 
-The workflow [.github/workflows/windows.yml](.github/workflows/windows.yml) packages the Windows GUI using PyInstaller on a Windows GitHub runner. **That workflow has to run on GitHub before its executable can be downloaded**; there is no prebuilt exe in the source archive.
+The workflow [.github/workflows/windows.yml](.github/workflows/windows.yml) packages the Windows GUI with PyInstaller on Windows runners on each main update. Open a successful workflow run and download the ZIP under **Artifacts**. The EXE installs official Core on first run after an explicit click, rather than bundling it.
 
 Repository SEO / topics suggestion: `vargamesh`, `vmesh`, `bitaxe`, `solo-mining`, `mining-pool`, `sha256d`, `asic-mining`, `stratum`, `auxpow`, `windows`, `bitcoin-mining-hardware`, `open-source`, `cryptocurrency`.
 
