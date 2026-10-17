@@ -36,6 +36,20 @@ Local dashboard: `http://127.0.0.1:8686`. Local Stratum: `127.0.0.1:3938`. Wait 
 docker compose -f compose.yaml -f compose.lan.yaml up -d --build
 ```
 
+### Optional public VPS mode — both Stratum and web on 0.0.0.0
+
+On your VPS, update your checkout with `git pull --ff-only`, then set the following values in `.env` and recreate the container with `docker compose up -d --build`:
+
+```dotenv
+MINIPOOL_STRATUM_BIND_IP=0.0.0.0
+MINIPOOL_WEB_BIND_IP=0.0.0.0
+MINIPOOL_DASHBOARD_ALLOWED_HOSTS=YOUR_PUBLIC_IPV4,pool.example.com
+```
+
+**Only set this if you intentionally accept public exposure.** Public URLs use the VPS IP/domain, not `0.0.0.0`: `http://YOUR_PUBLIC_IPV4:8686/` for the read-only dashboard and `YOUR_PUBLIC_IPV4:3938` for Stratum V1 miners. Allow TCP 8686 and 3938 through the VPS provider firewall. `29667` remains private. **The web interface has no login/TLS and public Stratum is unencrypted and not hardened against denial of service.** The dashboard Host allowlist is not authentication; prefer HTTPS + access control through Nginx Proxy Manager or another reverse proxy.
+
+**[Step-by-step public Stratum + dashboard deployment (English)](docs/PUBLIC-DEPLOYMENT.en.md)**
+
 For **Nginx Proxy Manager (NPM)**, use `compose.npm.yaml` with a shared external Docker network and an authenticated HTTPS Proxy Host; the dashboard is read-only but exposes public miner identities. Node.js/npm is *not* needed. **Do not publish Stratum or the dashboard on an unprotected public VPS**; for remote miners use a private VPN.
 
 **[Complete Linux + Docker + Bitaxe + NPM manual (German)](docs/DOCKER.de.md)** · [Linux Docker GitHub CI](.github/workflows/docker.yml) · [Dockerfile](Dockerfile)
