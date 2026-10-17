@@ -26,6 +26,7 @@ class PoolState:
         self.lock = threading.RLock()
         self.template = None
         self.node_info = None
+        self.chain_status = None
         self.node_error = 'Waiting for VargaMesh Core...'
         self.connected = set()
         self.started = time.monotonic()
@@ -64,6 +65,9 @@ class PoolState:
             return {'name':'VargaMesh MiniPool', 'mode':'VMESH-only SOLO','fee_percent':1,
                     'network':'mainnet', 'uptime':int(time.monotonic()-self.started),
                     'node_ready':self.template is not None,'node_error':self.node_error,
+                    'sync_blocks':self.chain_status.get('blocks') if self.chain_status else None,
+                    'sync_headers':self.chain_status.get('headers') if self.chain_status else None,
+                    'sync_progress':self.chain_status.get('verificationprogress') if self.chain_status else None,
                     'height':self.template['height'] if self.template else None,
                     'tip':self.template['previousblockhash'] if self.template else None,
                     'peers':self.node_info.get('connections') if self.node_info else None,
@@ -78,6 +82,8 @@ class PoolState:
         last_key=None
         while not self.stop.is_set():
             try:
+                chain_status=self.rpc.call('getblockchaininfo')
+                with self.lock:self.chain_status=chain_status
                 g=self.rpc.template()
                 key=(g['previousblockhash'],g['curtime'],g['coinbasevalue'],len(g['transactions']))
                 # Validate chain semantics BEFORE distributing work.

@@ -131,6 +131,51 @@ def headless(runtime):
     runtime.shutdown()
 
 
+def docker_headless(runtime):
+    """Run isolated official VMESH Core and solo pool together in one container.
+
+    Both processes share the same container loopback: RPC is never exported.
+    The pool can listen before sync, but won't issue valid jobs until the
+    underlying VargaMesh Core has left initial-block-download mode.
+    """
+    binary=pathlib.Path('/opt/vmesh/bin/vargameshd')
+    if not binary.is_file():
+        raise RuntimeError('Pinned official Linux Core is missing from Docker image')
+    conf=runtime.config
+    conf['node'].update({
+        'binary':str(binary),
+        'data_dir':'/data',
+        'cookie_path':'/data/.cookie',
+        'rpc_port':29667
+    })
+    pool=conf['pool']
+    pool.update({
+        'bind':'0.0.0.0',
+        'stratum_port':3938,
+        'dashboard_port':8686,
+        'audit_file':'/config/block-finds.jsonl'
+    })
+    difficulty=int(os.getenv('MINIPOOL_SHARE_DIFFICULTY') or '1024')
+    if not 1 <= difficulty <= 2**24:
+        raise ValueError('MINIPOOL_SHARE_DIFFICULTY outside safe range')
+    pool['share_difficulty']=difficulty
+    stop=threading.Event()
+    def on_signal(signum,frame):
+        stop.set()
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        signal.signal(sig,on_signal)
+    try:
+        runtime.start_node()
+        runtime.start_pool()
+        logging.info('Docker VMESH node and MiniPool started; RPC loopback only; no BTC node')
+        logging.info('First sync required before the pool issues mining jobs')
+        while not stop.wait(3):
+            if runtime.node_owned and runtime.node_process and runtime.node_process.poll() is not None:
+                raise RuntimeError('VargaMesh Core exited; inspect /data/debug.log')
+    finally:
+        runtime.shutdown()
+
+
 def gui(runtime):
     import tkinter as tk
     from tkinter import filedialog,messagebox,ttk
@@ -350,12 +395,14 @@ def gui(runtime):
 def main():
     parser=argparse.ArgumentParser(description='VMESH-only SHA256d Solo Stratum Pool')
     parser.add_argument('--headless',action='store_true',help='No Tk desktop GUI; dashboard stays available')
+    parser.add_argument('--docker',action='store_true',help='Bundled, verified VMESH Core and SOLO pool in Docker')
     args=parser.parse_args()
     logging.basicConfig(level=logging.INFO,format='%(asctime)s %(levelname)s %(message)s')
     conf=load_config()
     conf['pool'].setdefault('audit_file',str(APP_HOME/'block-finds.jsonl'))
     runtime=Runtime(conf)
-    if args.headless: headless(runtime)
+    if args.docker: docker_headless(runtime)
+    elif args.headless: headless(runtime)
     else:gui(runtime)
 
 if __name__=='__main__':main()

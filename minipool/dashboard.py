@@ -1,5 +1,6 @@
 """Local read-only dashboard. No external libraries or network calls."""
 import json
+import os
 import pathlib
 import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -11,6 +12,16 @@ class Dashboard(ThreadingHTTPServer):
 
 def start_dashboard(pool,port,webroot):
     root=pathlib.Path(webroot).resolve()
+    allowed={'localhost','127.0.0.1','[::1]'}
+    for name in os.environ.get('MINIPOOL_DASHBOARD_ALLOWED_HOSTS','').split(','):
+        name=name.strip().lower()
+        if name:
+            if any(ch in name for ch in '/\\@#? ') or len(name)>253:
+                raise ValueError('Invalid dashboard allowed hostname')
+            allowed.add(name)
+    bind=os.environ.get('MINIPOOL_DASHBOARD_BIND','127.0.0.1')
+    if bind not in ('0.0.0.0','127.0.0.1'):
+        raise ValueError('Dashboard bind must be 127.0.0.1 or 0.0.0.0')
     class Handler(SimpleHTTPRequestHandler):
         def __init__(self,*args,**kwargs): super().__init__(*args,directory=str(root),**kwargs)
         def end_headers(self):
@@ -20,7 +31,7 @@ def start_dashboard(pool,port,webroot):
             self.send_header('Referrer-Policy','no-referrer')
             super().end_headers()
         def do_GET(self):
-            if self.headers.get('Host','').split(':')[0].lower() not in ('localhost','127.0.0.1','[::1]'):
+            if self.headers.get('Host','').split(':')[0].lower().rstrip('.') not in allowed:
                 self.send_error(403); return
             if self.path.split('?')[0]=='/api/status':
                 b=json.dumps(pool.status()).encode()
@@ -32,7 +43,7 @@ def start_dashboard(pool,port,webroot):
                 self.send_error(404); return
             return super().do_GET()
         def log_message(self,*args): pass
-    server=Dashboard(('127.0.0.1',int(port)),Handler)
+    server=Dashboard((bind,int(port)),Handler)
     thread=threading.Thread(target=server.serve_forever,daemon=True,name='Dashboard')
     thread.start()
     return server
