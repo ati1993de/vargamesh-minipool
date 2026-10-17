@@ -15,6 +15,9 @@ DEV_FEE_SCRIPT = bytes.fromhex('001482608979e16b0fa9a38cc984c827fbc5a62afc70')
 DIFF1 = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
 ALPHABET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
 MAGIC = bytes.fromhex('fabe6d6d')
+# BIP310: rolling is permitted on the synthetic AuxPoW parent header ONLY.
+# The VMESH child header/version and its 1% coinbase payout never change.
+VERSION_ROLLING_MASK = 0x1fffe000
 
 
 def dsha(b: bytes) -> bytes:
@@ -192,7 +195,8 @@ def parent_candidate(job: ParentJob, extranonce2: bytes, ntime: int, nonce: int,
     if len(extranonce2) != job.extranonce2_size: raise ValueError('invalid extranonce2 size')
     if not 0 <= nonce < 2**32 or not 0 <= ntime < 2**32: raise ValueError('nonce/time out of range')
     v = job.parent_version if version is None else version
-    if v != job.parent_version: raise ValueError('version rolling not negotiated')
+    if not isinstance(v,int) or v < 0 or v >= 2**32 or ((v ^ job.parent_version) & ~VERSION_ROLLING_MASK):
+        raise ValueError('parent version changed outside safe BIP310 rolling mask')
     parent_coinbase = job.coinb1 + extranonce2 + job.coinb2
     root = dsha(parent_coinbase)
     header = (struct.pack('<I', v) + job.parent_prev + root +

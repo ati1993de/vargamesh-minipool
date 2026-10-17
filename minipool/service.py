@@ -14,7 +14,7 @@ from collections import deque
 from dataclasses import dataclass, field
 
 from .crypto import (DIFF1, bech32_script, compact_target, hash_meets_target,
-                     make_child_work, parent_candidate, parent_job)
+                     make_child_work, parent_candidate, parent_job, VERSION_ROLLING_MASK)
 from .rpc import VMeshRPC
 
 LOG = logging.getLogger('minipool')
@@ -148,6 +148,7 @@ class MinerHandler(socketserver.BaseRequestHandler):
         self.difficulty=int(self.pool.config['pool'].get('share_difficulty',1024))
         self.authorized=False
         self.subscribed=False
+        self.version_rolling_mask=0  # per-connection BIP310 negotiation, never child nVersion
         self.worker=''
         self.address=''
         self.accepted=self.rejected=0
@@ -202,8 +203,41 @@ class MinerHandler(socketserver.BaseRequestHandler):
         id=m.get('id'); method=m['method']; p=m.get('params',[])
         if not isinstance(p,list): raise ValueError('Invalid parameters')
         if method=='mining.configure':
-            # Explicitly do not negotiate version rolling (our jobs pin nVersion).
-            self.respond(id, {'version-rolling':False},None)
+            # BIP310 extensions: changes ONLY the synthetic AuxPoW parent nVersion.
+            # The VMESH child block header, chain ID and 99/1 coinbase remain fixed.
+            if len(p)<1 or not isinstance(p[0],list):
+                return self.respond(id,None,[20,'Invalid BIP310 extensions',None])
+            if len(p)>1 and not isinstance(p[1],dict):
+                return self.respond(id,None,[20,'Invalid BIP310 parameters',None])
+            extensions=p[0]
+            opts=p[1] if len(p)>1 else {}
+            response={}
+            for extension in extensions:
+                if not isinstance(extension,str):
+                    return self.respond(id,None,[20,'Invalid BIP310 extension name',None])
+                if extension!='version-rolling':
+                    response[extension]=False
+                    continue
+                try:
+                    miner_hex=opts.get('version-rolling.mask','ffffffff')
+                    if not isinstance(miner_hex,str) or len(miner_hex)!=8:
+                        raise ValueError('Invalid miner version rolling mask')
+                    miner_mask=int(miner_hex,16)
+                    min_bits=opts.get('version-rolling.min-bit-count',0)
+                    if type(min_bits) is not int or not 0<=min_bits<=32:
+                        raise ValueError('Invalid minimum version bit count')
+                    common=miner_mask & VERSION_ROLLING_MASK
+                    if common and common.bit_count()>=min_bits:
+                        self.version_rolling_mask=common
+                        response[extension]=True
+                        response['version-rolling.mask']=f'{common:08x}'
+                    else:
+                        self.version_rolling_mask=0
+                        response[extension]=False
+                except (ValueError,TypeError):
+                    self.version_rolling_mask=0
+                    response[extension]=False
+            self.respond(id,response,None)
         elif method=='mining.subscribe':
             self.subscribed=True
             self.respond(id,[[['mining.set_difficulty','minipool'],['mining.notify','minipool']],self.nonce1.hex(),4],None)
@@ -248,11 +282,24 @@ class MinerHandler(socketserver.BaseRequestHandler):
             if len(ex2)!=8 or len(ts)!=8 or len(nonce_s)!=8: raise ValueError('Invalid hex field length')
             extra=bytes.fromhex(ex2)
             ntime=int(ts,16); nonce=int(nonce_s,16)
-            if len(p)>=6 and int(str(p[5]),16)!=0x20000000: raise ValueError('Version rolling not supported')
+            version=None
+            version_bits=None
+            if len(p)>=6:
+                if not self.version_rolling_mask:
+                    raise ValueError('Version rolling was not negotiated')
+                raw_bits=p[5]
+                if not isinstance(raw_bits,str) or len(raw_bits)!=8:
+                    raise ValueError('Invalid BIP310 version bits')
+                version_bits=int(raw_bits,16)
+                if version_bits & ~self.version_rolling_mask:
+                    raise ValueError('Version bits outside negotiated mask')
             with self.job_lock:
                 job=self.jobs.get(jobid)
                 if not job: raise ValueError('Unknown/stale job')
-                key=(jobid,ex2,ts,nonce_s)
+                # A different rolled nVersion is distinct share work, not a duplicate.
+                key=(jobid,ex2.lower(),ts.lower(),nonce_s.lower(),version_bits)
+                if version_bits is not None:
+                    version=(job.parent_version & ~self.version_rolling_mask) | version_bits
                 if key in self.duplicates: raise ValueError('Duplicate share')
                 if len(self.duplicates)>=20000: raise ValueError('Job share limit reached, await next job')
                 self.duplicates.add(key)
@@ -262,7 +309,7 @@ class MinerHandler(socketserver.BaseRequestHandler):
                 if (not self.pool.template or
                     self.pool.template['previousblockhash']!=job.work.previous):
                     raise ValueError('Stale chain tip')
-            header, rawblock=parent_candidate(job,extra,ntime,nonce)
+            header, rawblock=parent_candidate(job,extra,ntime,nonce,version=version)
             hash_num=int.from_bytes(__import__('hashlib').sha256(__import__('hashlib').sha256(header).digest()).digest(),'little')
             target=min((DIFF1 // self.difficulty),2**256-1)
             if hash_num > target: raise ValueError('Low difficulty share')
@@ -281,6 +328,8 @@ class MinerHandler(socketserver.BaseRequestHandler):
         except (ValueError,TypeError,KeyError) as e:
             self.rejected+=1
             with self.pool.lock:self.pool.rejected+=1
+            if self.rejected<=4 or self.rejected%50==0:
+                self.pool.log(f'Share rejected for {self.worker or self.client_address[0]}: {str(e)[:130]}','warning')
             self.respond(id,False,[23,str(e)[:100],None])
         except Exception as e:
             self.pool.log('Share processing failure: '+str(e)[:150],'error')
