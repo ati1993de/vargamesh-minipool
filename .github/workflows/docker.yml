@@ -32,9 +32,21 @@ jobs:
           file: Dockerfile
           platforms: linux/amd64
           push: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          load: ${{ !startsWith(github.ref, 'refs/tags/v') }}
           tags: |
             ghcr.io/ati1993de/vargamesh-minipool:latest
             ghcr.io/ati1993de/vargamesh-minipool:${{ github.ref_name }}
+      - name: Container startup and dashboard smoke test (main)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker compose up -d --no-build
+          python scripts/docker_smoke.py
+      - name: Show container logs and stop smoke stack
+        if: always() && github.ref == 'refs/heads/main'
+        run: |
+          docker compose ps || true
+          docker compose logs --tail=80 || true
+          docker compose down || true
       - name: Validate Compose configuration
         run: |
           docker compose -f compose.yaml config --quiet
