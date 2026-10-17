@@ -1,0 +1,31 @@
+name: Promote v0.3.1 to Latest Release
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/promote-v0.3.1.yml
+permissions:
+  contents: write
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Make existing v0.3.1 the latest non-prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          repo="${GITHUB_REPOSITORY}"
+          tag="v0.3.1"
+          release_id="$(gh api "repos/$repo/releases/tags/$tag" --jq .id)"
+          test -n "$release_id"
+          gh api --method PATCH "repos/$repo/releases/$release_id" \
+            -F prerelease=false -f make_latest=true \
+            --jq '{tag: .tag_name, prerelease: .prerelease, draft: .draft, url: .html_url}'
+          latest_tag="$(gh api "repos/$repo/releases/latest" --jq .tag_name)"
+          if [ "$latest_tag" != "$tag" ]; then
+            echo "Expected latest release $tag, got $latest_tag" >&2
+            exit 1
+          fi
+          echo "Confirmed latest release: $latest_tag"
