@@ -1,11 +1,11 @@
 # VMESH-only MiniPool + pinned official Linux x86_64 VargaMesh Core.
-FROM python:3.13-slim-bookworm AS core
+FROM python:3.13-slim-trixie AS core
 WORKDIR /build
 COPY scripts/install_linux_core.py scripts/install_linux_core.py
 RUN python3 scripts/install_linux_core.py --dest /opt/vmesh \
     && /opt/vmesh/bin/vargameshd --version
 
-FROM python:3.13-slim-bookworm
+FROM python:3.13-slim-trixie
 LABEL org.opencontainers.image.source="https://github.com/ati1993de/vargamesh-minipool" \
       org.opencontainers.image.description="Self-hosted VMESH-only SOLO mining with VargaMesh Core, Bitaxe Stratum V1 and 1% developer fee" \
       org.opencontainers.image.licenses="MIT"
