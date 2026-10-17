@@ -4,13 +4,15 @@
 
 > **Entwickler-Vorschau v0.1.0:** Die lokalen Tests sind erfolgreich. Ein echter Mainnet-Blockfund mit einem ASIC wurde für diese Version noch nicht nachgewiesen.
 
-## Windows-Schnellstart
+## Windows: VMESH-Node und SOLO-Pool mit einem Klick
 
-1. Offiziellen [VargaMesh Core](https://github.com/ati1993de/vargamesh-core/releases) für Windows herunterladen, Prüfsumme kontrollieren und entpacken.
-2. Python 3.10+ installieren, dann `start-windows.bat` doppelklicken. Alternativ die Windows-EXE erst nach dem GitHub-Actions-Build verwenden.
-3. Im Programm `vargameshd.exe` auswählen und auf **Start VargaMesh Node** klicken. Vollständige Synchronisierung abwarten.
-4. **Start SOLO Pool** klicken und das Dashboard im Browser öffnen (`http://127.0.0.1:8686`).
-5. Bitaxe oder anderen SHA-256d-Miner auf die LAN-IP des PCs und Port `3938` konfigurieren.
+1. Auf [GitHub Actions – Windows](https://github.com/ati1993de/vargamesh-minipool/actions/workflows/windows.yml) einen erfolgreichen Build öffnen und das ZIP-Artefakt **VargaMesh-MiniPool-Windows-x64** herunterladen. Entpacken und **VargaMesh-MiniPool.exe** starten. Alternativ Python 3.10+ installieren und **start-windows.bat** aus dem Quellcode starten.
+2. Auf **ONE CLICK: Install VMESH Node & Start Pool** klicken.
+3. MiniPool lädt den **offiziellen VargaMesh Core v0.2.0** und überprüft die fest eingebauten SHA-256-Prüfsummen für Manifest und Core-Archiv. Die Node wird in einem separaten Benutzerordner installiert. **Kein Bitcoin-Core erforderlich.**
+4. Die eigene VMESH-Mainnet-Node startet und synchronisiert. Den Fortschritt zeigt die Oberfläche an. **Erst nach vollständiger Synchronisierung startet der VMESH-SOLO-Stratum-Server automatisch.**
+5. Die **öffentliche vm1... Wallet-Adresse** eingeben und **Copy Bitaxe settings** klicken. Diese Verbindungsdaten in den Bitaxe oder anderen ASIC eintragen. Keine Seed-Phrase oder Private Keys erforderlich.
+
+**Sicherheit:** Die App installiert Core nur nach Nutzerklick. RPC ist ausschließlich lokal gebunden. Stratum für das Heimnetz nur durch die private Windows-Firewall freigeben. Die Windows-EXE ist unsigniert. Kein echter Mainnet-Blockfund mit ASIC ist für diesen Entwickler-Preview nachgewiesen. Die integrierte 1-%-VMESH-Gebühr wird direkt in der Coinbase-Transaktion abgezogen, nicht durch Blockchain-Konsens.
 
 | Miner-Einstellung | Beispiel |
 |---|---|
