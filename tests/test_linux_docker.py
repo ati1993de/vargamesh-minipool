@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from unittest import mock
 import hashlib
+import os
 from scripts import install_linux_core as core
 
 class LinuxInstallerTests(unittest.TestCase):
@@ -36,7 +37,8 @@ class LinuxInstallerTests(unittest.TestCase):
             ]))
             out=core.extract_core(archive,base/'target')
             self.assertEqual(out.read_bytes(),b'fake node binary')
-            self.assertTrue(out.stat().st_mode & 0o111)
+            if os.name != 'nt':
+                self.assertTrue(out.stat().st_mode & 0o111)
 
     def test_reject_tar_traversal_and_missing_daemon(self):
         with tempfile.TemporaryDirectory() as directory:
