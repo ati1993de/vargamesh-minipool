@@ -16,8 +16,12 @@ if [[ ! -f .env ]]; then
 fi
 docker compose config --quiet
 # Read the effective bindings from .env without executing .env as shell code.
-STRATUM_BIND="$(docker compose config --format json | python3 -c 'import json,sys; d=json.load(sys.stdin); p=d["services"]["minipool"]["ports"]; print(next(x["host_ip"] for x in p if x["target"]==3938))')"
-WEB_BIND="$(docker compose config --format json | python3 -c 'import json,sys; d=json.load(sys.stdin); p=d["services"]["minipool"]["ports"]; print(next(x["host_ip"] for x in p if x["target"]==8686))')"
+# The Docker setup itself requires no host Python interpreter.
+# These values come from the explicit .env override, defaulting to loopback.
+STRATUM_BIND="$(sed -n 's/^MINIPOOL_STRATUM_BIND_IP=//p' .env | tail -n1)"
+WEB_BIND="$(sed -n 's/^MINIPOOL_WEB_BIND_IP=//p' .env | tail -n1)"
+STRATUM_BIND="${STRATUM_BIND:-127.0.0.1}"
+WEB_BIND="${WEB_BIND:-127.0.0.1}"
 if [[ "$WEB_BIND" == "0.0.0.0" ]]; then
   if ! grep -Eq '^MINIPOOL_DASHBOARD_ALLOWED_HOSTS=[^[:space:]]+' .env; then
     echo "ERROR: Public web bind requires MINIPOOL_DASHBOARD_ALLOWED_HOSTS=public-ip-or-domain in .env." >&2
