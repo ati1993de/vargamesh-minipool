@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from minipool.node_installer import install_windows_core, CORE_VERSION
 
 
