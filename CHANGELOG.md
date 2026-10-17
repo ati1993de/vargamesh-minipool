@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.3 — 2026-10-17
+
+AxeOS Stratum V1 mining notification coinbase-height decoder compatibility.
+
+- Encode the **VMESH child height** as the first BIP34-style push in the synthetic AuxPoW parent coinbase `scriptSig`, before the `/VMESH/` identifier.
+- Fix AxeOS v2.14+ `Failed to process mining notification` and blank `Block Header` fields triggered when it treated `/` as an invalid height push length.
+- Preserve Stratum V1 extranonce1+extranonce2 handling, BIP310 version rolling, synthetic AuxPoW commitment, and the VMESH-only 99% miner / 1% developer coinbase.
+- Add tests validating that the actual `mining.notify` fields have the height data at offsets read by the AxeOS firmware.
+- Explain that the synthetic parent block has no BTC reward, so its AxeOS parent `Amount` is zero, independent of the real VMESH child payouts.
+
+**Note:** This preview has passed simulated miner integration tests but real ASIC mainnet block acceptance still needs verification.
+
 ## 0.2.2 — 2026-10-17
 
 Fixes Stratum V1 ASIC share verification and wrong duplicate counting.
