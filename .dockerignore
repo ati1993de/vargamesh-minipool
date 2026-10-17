@@ -1,0 +1,17 @@
+.git
+.github
+*.zip
+*.tar.gz
+*.pyc
+__pycache__
+.venv
+.pytest_cache
+dist
+build
+*.spec
+config.json
+*.cookie
+*.log
+.env
+.env.*
+volumes
