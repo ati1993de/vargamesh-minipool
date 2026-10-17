@@ -56,6 +56,9 @@ class ASICCoinbaseTests(unittest.TestCase):
     def test_asic_work_without_rolling_matches_submitted_parent(self):
         previous=svc.DIFF1
         svc.DIFF1=2**256-1
+        # For a deterministic easy-network fixture, also request share diff 1.
+        # Production ASICs keep the independently configured 1024 default.
+        self.pool.config['pool']['share_difficulty']=1
         try:
             sock,c,en1,notify=self.connect()
             with sock:
