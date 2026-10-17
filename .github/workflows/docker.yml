@@ -51,3 +51,4 @@ jobs:
         run: |
           docker compose -f compose.yaml config --quiet
           STRATUM_BIND_IP=127.0.0.1 docker compose -f compose.yaml -f compose.lan.yaml config --quiet
+          MINIPOOL_STRATUM_BIND_IP=0.0.0.0 MINIPOOL_WEB_BIND_IP=0.0.0.0 MINIPOOL_DASHBOARD_ALLOWED_HOSTS=203.0.113.10 docker compose config --format json | python -c "import json,sys; cfg=json.load(sys.stdin); p=cfg['services']['minipool']['ports']; hosts={str(x['target']):x['host_ip'] for x in p}; assert hosts.get('3938')=='0.0.0.0' and hosts.get('8686')=='0.0.0.0', hosts; print('Explicit public binding validated:',hosts)"
