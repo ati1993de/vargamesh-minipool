@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.0 — 2026-10-17
+
+Linux Docker Compose all-in-one VMESH-only SOLO pool, keeping Windows functionality.
+
+- Multi-stage Docker image with the **official Core v0.2.0 Linux x86_64** downloaded from the pinned release and verified with two SHA-256 digests.
+- Debian Trixie base for official Core's required glibc and libstdc++ runtime.
+- Non-root image, read-only filesystem, persistent Core blockchain and configuration volumes, and authenticated loopback-only RPC.
+- Docker startup mode starts Core and Stratum/dashboard in a single container; mining work is distributed only after the VMESH node is synchronized.
+- Dashboard API now includes node sync progress (block height and headers).
+- Default Docker host ports bound to loopback; optional `compose.lan.yaml` for trusted Bitaxe LAN; `compose.npm.yaml` for an authenticated HTTPS Nginx Proxy Manager installation.
+- Linux-specific installer unit tests, Compose configuration checks, **real Docker container startup smoke test** with official Core and read-only dashboard API.
+- No BTC node, merged BTC mining, Node.js, npm tooling or consensus changes. Existing 1% developer output in VMESH child coinbase unchanged.
+
+**Developer preview:** No independently verified hardware-mined VMESH mainnet accepted block yet.
+
 ## 0.2.3 — 2026-10-17
 
 AxeOS Stratum V1 mining notification coinbase-height decoder compatibility.
