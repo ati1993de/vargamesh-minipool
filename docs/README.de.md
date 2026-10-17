@@ -2,11 +2,11 @@
 
 **Eigene VMESH-Blöcke mit dem eigenen Computer und eigener VargaMesh-Node finden.** Kein BTC-Full-Node, keine BTC-Auszahlung, kein zentraler Mining-Account.
 
-> **Entwickler-Vorschau v0.1.0:** Die lokalen Tests sind erfolgreich. Ein echter Mainnet-Blockfund mit einem ASIC wurde für diese Version noch nicht nachgewiesen.
+> **Entwickler-Vorschau v0.2.0:** Die lokalen Tests sind erfolgreich. Ein echter Mainnet-Blockfund mit einem ASIC wurde für diese Version noch nicht nachgewiesen.
 
 ## Windows: VMESH-Node und SOLO-Pool mit einem Klick
 
-1. Auf [GitHub Actions – Windows](https://github.com/ati1993de/vargamesh-minipool/actions/workflows/windows.yml) einen erfolgreichen Build öffnen und das ZIP-Artefakt **VargaMesh-MiniPool-Windows-x64** herunterladen. Entpacken und **VargaMesh-MiniPool.exe** starten. Alternativ Python 3.10+ installieren und **start-windows.bat** aus dem Quellcode starten.
+1. Beim [offiziellen GitHub Release v0.2.0](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.2.0) die Datei **VargaMesh-MiniPool-Windows-x64.zip** herunterladen, vollständig entpacken und **VargaMesh-MiniPool.exe** starten. Dort gibt es auch eine **SHA-256-Prüfsumme** und den Quellcode. Für neuere Entwickler-Versionen alternativ [GitHub Actions](https://github.com/ati1993de/vargamesh-minipool/actions/workflows/windows.yml) verwenden. Bei der Release-EXE ist kein Python erforderlich.
 2. Auf **ONE CLICK: Install VMESH Node & Start Pool** klicken.
 3. MiniPool lädt den **offiziellen VargaMesh Core v0.2.0** und überprüft die fest eingebauten SHA-256-Prüfsummen für Manifest und Core-Archiv. Die Node wird in einem separaten Benutzerordner installiert. **Kein Bitcoin-Core erforderlich.**
 4. Die eigene VMESH-Mainnet-Node startet und synchronisiert. Den Fortschritt zeigt die Oberfläche an. **Erst nach vollständiger Synchronisierung startet der VMESH-SOLO-Stratum-Server automatisch.**
@@ -21,6 +21,10 @@
 | Passwort | `x` |
 
 **99% der gesamten VMESH-Coinbase-Auszahlung** gehen an die hinterlegte gültige VMESH-Adresse. Die feste **1% Entwicklergebühr** geht an `vm1qsfsgj70pdv86nguvexzvsflmcknz4lrsj87wx9`. Die Ausgabe wird direkt als zweite Coinbase-Ausgabe erstellt. Das ist **keine** Gebühr des VMESH-Konsensprotokolls.
+
+## Download überprüfen
+
+Beim [GitHub Release v0.2.0](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.2.0) sowohl `VargaMesh-MiniPool-Windows-x64.zip` als auch `SHA256SUMS-MiniPool-Windows` herunterladen. Unter PowerShell mit `Get-FileHash -Algorithm SHA256 .\VargaMesh-MiniPool-Windows-x64.zip` den SHA-256-Wert ermitteln und mit der Prüfsummen-Datei vergleichen. Der offizielle VMESH-Node wird **separat und erst nach Nutzerklick** heruntergeladen und mit fest hinterlegten Prüfsummen geprüft.
 
 ## Warum funktioniert das ohne Bitcoin-Node?
 
