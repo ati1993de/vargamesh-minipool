@@ -51,7 +51,9 @@ class CryptoTests(unittest.TestCase):
         height_len = job.coinb1[42]
         self.assertTrue(1 <= height_len <= 4)
         self.assertEqual(int.from_bytes(job.coinb1[43:43+height_len],'little'),work.height)
-        self.assertEqual(len(coinbase)-46,script_len+4+1+8+1+1+4)
+        # Parent tx: 42-byte input prefix + scriptSig + 4-byte sequence,
+        # one zero-valued OP_TRUE output (11 bytes) + 4-byte locktime.
+        self.assertEqual(len(coinbase),61+script_len)
         self.assertIn(b'/VMESH/',job.coinb1)
         self.assertNotIn(b'\xf1\xbe',job.coinb1)
         self.assertIn(MAGIC+bytes.fromhex(work.child_hash)+struct.pack('<II',1,0),coinbase)
