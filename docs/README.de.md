@@ -2,7 +2,7 @@
 
 **Eigene VMESH-Blöcke mit dem eigenen Computer und eigener VargaMesh-Node finden.** Kein BTC-Full-Node, keine BTC-Auszahlung, kein zentraler Mining-Account.
 
-> **Entwickler-Vorschau v0.3.0:** Die lokalen Tests sind erfolgreich. Ein echter Mainnet-Blockfund mit einem ASIC wurde für diese Version noch nicht nachgewiesen.
+> **Entwickler-Vorschau v0.3.1:** Die lokalen Tests sind erfolgreich. Ein echter Mainnet-Blockfund mit einem ASIC wurde für diese Version noch nicht nachgewiesen.
 
 ## Linux Docker Compose – VMESH-Node direkt enthalten
 
@@ -12,7 +12,7 @@
 
 ## Windows: VMESH-Node und SOLO-Pool mit einem Klick
 
-1. Beim [offiziellen GitHub Release v0.3.0](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.3.0) die Datei **VargaMesh-MiniPool-Windows-x64.zip** herunterladen, vollständig entpacken und **VargaMesh-MiniPool.exe** starten. Dort gibt es auch eine **SHA-256-Prüfsumme** und den Quellcode. Für neuere Entwickler-Versionen alternativ [GitHub Actions](https://github.com/ati1993de/vargamesh-minipool/actions/workflows/windows.yml) verwenden. Bei der Release-EXE ist kein Python erforderlich.
+1. Beim [offiziellen GitHub Release v0.3.1](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.3.1) die Datei **VargaMesh-MiniPool-Windows-x64.zip** herunterladen, vollständig entpacken und **VargaMesh-MiniPool.exe** starten. Dort gibt es auch eine **SHA-256-Prüfsumme** und den Quellcode. Für neuere Entwickler-Versionen alternativ [GitHub Actions](https://github.com/ati1993de/vargamesh-minipool/actions/workflows/windows.yml) verwenden. Bei der Release-EXE ist kein Python erforderlich.
 2. Auf **ONE CLICK: Install VMESH Node & Start Pool** klicken.
 3. MiniPool lädt den **offiziellen VargaMesh Core v0.2.0** und überprüft die fest eingebauten SHA-256-Prüfsummen für Manifest und Core-Archiv. Die Node wird in einem separaten Benutzerordner installiert. **Kein Bitcoin-Core erforderlich.**
 4. Die eigene VMESH-Mainnet-Node startet und synchronisiert. Den Fortschritt zeigt die Oberfläche an. **Erst nach vollständiger Synchronisierung startet der VMESH-SOLO-Stratum-Server automatisch.**

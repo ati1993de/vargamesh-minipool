@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.1 — 2026-10-17
+
+Opt-in public Docker deployment for Linux VPS with explicit port bindings and complete English instructions.
+
+- Separate Compose host-publish variables: `MINIPOOL_STRATUM_BIND_IP` for TCP 3938, and `MINIPOOL_WEB_BIND_IP` for TCP 8686. Both default to `127.0.0.1`; setting both to `0.0.0.0` intentionally exposes them on all VPS network interfaces.
+- Keep VMESH Core RPC private on the container's loopback `127.0.0.1:29667`. No Bitcoin node or BTC mining.
+- Require explicit `MINIPOOL_DASHBOARD_ALLOWED_HOSTS` entries for public IP/FQDN requests; Host allowlisting is not authentication.
+- Improve `start-docker.sh` host-binding diagnostics and warnings; keep existing persistent Docker volumes unchanged.
+- Add complete English `docs/PUBLIC-DEPLOYMENT.en.md`, update German Docker guide and English README with VPS provider firewall requirements, Docker/UFW forwarding caveat, remote Bitaxe configuration, NPM HTTPS recommendation and rollback.
+- Add tests covering accepted and denied HTTP Host headers, plus CI Compose checks for both public TCP host bindings.
+- Retain native Windows GUI and SHA256-pinned official VMESH Core v0.2.0, SOLO Stratum V1, BIP310, and fixed 1% VMESH developer coinbase output.
+
+**Security:** Raw public Stratum V1 is not encrypted or abuse-hardened. Direct public HTTP has no login and no TLS. Prefer firewall restrictions for miners and authenticated HTTPS for dashboard. Developer preview; no independently verified ASIC-mined VMESH mainnet accepted block.
+
 ## 0.3.0 — 2026-10-17
 
 Linux Docker Compose all-in-one VMESH-only SOLO pool, keeping Windows functionality.

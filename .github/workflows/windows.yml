@@ -33,13 +33,13 @@ jobs:
         with:
           name: VargaMesh-MiniPool-Windows-x64
           path: VargaMesh-MiniPool-Windows-x64.zip
-      - name: Create official v0.3.0 developer-preview release
+      - name: Create official v0.3.1 developer-preview release
         if: github.ref == 'refs/heads/main'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = 'v0.3.0'
+          $tag = 'v0.3.1'
           $repo = '${{ github.repository }}'
           gh release view $tag --repo $repo *> $null
           if ($LASTEXITCODE -eq 0) {
@@ -48,7 +48,7 @@ jobs:
           }
           $sha = (Get-FileHash VargaMesh-MiniPool-Windows-x64.zip -Algorithm SHA256).Hash.ToLowerInvariant()
           "$sha  VargaMesh-MiniPool-Windows-x64.zip" | Set-Content -Encoding ascii SHA256SUMS-MiniPool-Windows
-          gh release create $tag VargaMesh-MiniPool-Windows-x64.zip SHA256SUMS-MiniPool-Windows --repo $repo --target '${{ github.sha }}' --title "VargaMesh MiniPool v0.3.0 — Windows GUI + Linux Docker" --notes-file docs/RELEASE-v0.3.0.md --prerelease
+          gh release create $tag VargaMesh-MiniPool-Windows-x64.zip SHA256SUMS-MiniPool-Windows --repo $repo --target '${{ github.sha }}' --title "VargaMesh MiniPool v0.3.1 — Public VPS Docker Stratum and Web" --notes-file docs/RELEASE-v0.3.1.md --prerelease
           if ($LASTEXITCODE -ne 0) { throw "Failed to publish $tag with release assets" }
       - name: Attach Windows GUI to pre-release
         if: startsWith(github.ref, 'refs/tags/v')

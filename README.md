@@ -4,7 +4,7 @@
 
 [![VMESH](https://img.shields.io/badge/VMESH-mainnet-38bcab)](https://vargamesh.com/) [![SHA256d](https://img.shields.io/badge/Mining-SHA--256d-blue)](https://vargamesh.com/mining.html) [![Fee](https://img.shields.io/badge/Developer%20fee-1%25-6b85ff)](#transparent-1-developer-fee) [![CI](https://github.com/ati1993de/vargamesh-minipool/actions/workflows/test.yml/badge.svg)](https://github.com/ati1993de/vargamesh-minipool/actions) [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-> **Release status: v0.3.0 developer preview (Windows GUI + Docker for Linux x86_64).** Offline serialization and mock-Stratum tests pass, and the GitHub Windows build checks the official VargaMesh Core download, checksum, and executable. An end-to-end, hardware-backed VMESH **mainnet accepted-block test has NOT been performed** for this release. Do not present this preview as audited or production-proven. Test with a dedicated synchronized node before production use. No guarantee of block rewards or profitability.
+> **Release status: v0.3.1 developer preview (Windows GUI + Docker for Linux x86_64).** Offline serialization and mock-Stratum tests pass, and the GitHub Windows build checks the official VargaMesh Core download, checksum, and executable. An end-to-end, hardware-backed VMESH **mainnet accepted-block test has NOT been performed** for this release. Do not present this preview as audited or production-proven. Test with a dedicated synchronized node before production use. No guarantee of block rewards or profitability.
 
 ## Why MiniPool?
 
@@ -56,10 +56,10 @@ For **Nginx Proxy Manager (NPM)**, use `compose.npm.yaml` with a shared external
 
 ## One-click quick start — Windows 10/11 (no manual node setup)
 
-[**Download current MiniPool v0.3.0 release (Windows + source)**](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.3.0) · [**Deutsche Anleitung**](docs/README.de.md) · [**Release notes**](docs/RELEASE-v0.2.0.md)
+[**Download current MiniPool v0.3.1 release (Windows + source)**](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.3.1) · [**Deutsche Anleitung**](docs/README.de.md) · [**Release notes**](docs/RELEASE-v0.3.1.md)
 
 
-**Recommended:** Download **VargaMesh-MiniPool-Windows-x64.zip** from the [official v0.2.0 GitHub Release](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.3.0). Extract the ZIP completely and run **VargaMesh-MiniPool.exe**. The release also provides a separate SHA-256 checksum file. Alternatively, obtain the latest developer artifact from [GitHub Actions](https://github.com/ati1993de/vargamesh-minipool/actions/workflows/windows.yml), or use Python 3.10+ with **start-windows.bat**.
+**Recommended:** Download **VargaMesh-MiniPool-Windows-x64.zip** from the [official v0.3.1 GitHub Release](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.3.1). Extract the ZIP completely and run **VargaMesh-MiniPool.exe**. The release also provides a separate SHA-256 checksum file. Alternatively, obtain the latest developer artifact from [GitHub Actions](https://github.com/ati1993de/vargamesh-minipool/actions/workflows/windows.yml), or use Python 3.10+ with **start-windows.bat**.
 
 1. Click **ONE CLICK: Install VMESH Node & Start Pool** in the Windows GUI.
 2. MiniPool downloads **official VargaMesh Core v0.2.0 (Windows x64)** from the official GitHub release, verifies the manifest and archive against two **pinned SHA-256 hashes**, and extracts the node into your user's Local AppData folder.
@@ -183,7 +183,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the serialization and valid
 
 ### Verify the Windows release ZIP
 
-Download `VargaMesh-MiniPool-Windows-x64.zip` and `SHA256SUMS-MiniPool-Windows` from the same [v0.2.3 release](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.3.0). In PowerShell, compare the `Get-FileHash -Algorithm SHA256` output of the ZIP with the first digest in the checksum file. The MiniPool Windows ZIP **does not bundle the node**: the separately downloaded official VargaMesh Core v0.2.0 archive is verified at installation time.
+Download `VargaMesh-MiniPool-Windows-x64.zip` and `SHA256SUMS-MiniPool-Windows` from the same [v0.2.3 release](https://github.com/ati1993de/vargamesh-minipool/releases/tag/v0.3.1). In PowerShell, compare the `Get-FileHash -Algorithm SHA256` output of the ZIP with the first digest in the checksum file. The MiniPool Windows ZIP **does not bundle the node**: the separately downloaded official VargaMesh Core v0.2.0 archive is verified at installation time.
 
 ## Security and limitations
 
