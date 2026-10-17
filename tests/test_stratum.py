@@ -13,6 +13,9 @@ class FakeRPC:
     def chain_info(self):return {'chain':'main','initialblockdownload':False}
     def template(self):return sample_gbt()
     def call(self,method,*args):
+        if method=='getblockchaininfo':
+            return {'chain':'main','initialblockdownload':False,'blocks':24,
+                    'headers':24,'verificationprogress':1.0}
         if method=='getnetworkinfo':return {'connections':2}
         if method=='getbestblockhash':return sample_gbt()['previousblockhash']
         if method=='submitblock':
