@@ -1,0 +1,48 @@
+name: Windows GUI build
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Run Python tests
+        run: python -m unittest discover -v
+      - name: Install PyInstaller
+        run: python -m pip install 'pyinstaller>=6,<7'
+      - name: Build GUI (unsigned developer-preview binary)
+        run: pyinstaller --clean --noconfirm --onedir --windowed --name VargaMesh-MiniPool --add-data "web;web" main.py
+      - name: Package Windows GUI
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist/VargaMesh-MiniPool -DestinationPath VargaMesh-MiniPool-Windows-x64.zip -Force
+          Get-FileHash VargaMesh-MiniPool-Windows-x64.zip -Algorithm SHA256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VargaMesh-MiniPool-Windows-x64
+          path: VargaMesh-MiniPool-Windows-x64.zip
+      - name: Attach Windows GUI to pre-release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = '${{ github.ref_name }}'
+          $repo = '${{ github.repository }}'
+          $found = $false
+          for ($i=0; $i -lt 18; $i++) {
+            gh release view $tag --repo $repo *> $null
+            if ($LASTEXITCODE -eq 0) { $found = $true; break }
+            Start-Sleep -Seconds 10
+          }
+          if (-not $found) { throw "GitHub Release $tag not found" }
+          gh release upload $tag VargaMesh-MiniPool-Windows-x64.zip --repo $repo
+          if ($LASTEXITCODE -ne 0) { throw 'Failed to attach Windows ZIP to release' }

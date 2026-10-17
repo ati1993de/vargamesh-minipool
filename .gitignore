@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+config.json
+*.log
+*.cookie
+*.zip
+build/
+dist/
+*.spec
+.DS_Store
+.vscode/

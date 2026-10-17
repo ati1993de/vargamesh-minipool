@@ -1,0 +1,15 @@
+{
+  "node": {
+    "binary": "",
+    "data_dir": "",
+    "cookie_path": "",
+    "rpc_port": 29667
+  },
+  "pool": {
+    "bind": "0.0.0.0",
+    "stratum_port": 3938,
+    "dashboard_port": 8686,
+    "share_difficulty": 1024,
+    "refresh_seconds": 12
+  }
+}
